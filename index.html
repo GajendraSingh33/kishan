@@ -1830,10 +1830,13 @@ document.getElementById('userRole').textContent = user.role;
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
     try {
-      const cat = currentCategory !== 'All' ? `&category=${currentCategory}` : '';
+      const params = new URLSearchParams();
+      if (currentCategory !== 'All') params.set('category', currentCategory);
       const search = document.getElementById('searchInput').value.trim();
-      const q = search ? `&search=${encodeURIComponent(search)}` : '';
-      const res = await fetch(`${API}/products?${cat}${q}`);
+      if (search) params.set('search', search);
+      const query = params.toString();
+      const res = await fetch(`${API}/products${query ? `?${query}` : ''}`);
+      if (!res.ok) throw new Error(`Products request failed (${res.status})`);
       products = await res.json();
       document.getElementById('statProducts').textContent = products.length;
       renderGrid(products);
